@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">TextureRecognizer</string>
+    
+    <!-- Dialog for sensor selection -->
+    <string name="sensor_accel">Acceleration Sensor</string>
+    <string name="sensor_grav">Gravity Sensor</string>
+    <string name="sensor_gyro">Gyroscope</string>
+    <string name="sensor_magnet">Magnetic Field Sensor</string>
+    <string name="sensor_rotvec">Rotation Vector Sensor</string>
+    
+    <!-- Preferences -->
+    <string name="select_sensors">Please select the sensors you want to use:</string>
+    <string name="title_sensor_group">Sensors</string>
+    <string name="title_accel_group">Acceleration Sensor</string>
+    <string name="title_mode_group">Recording mode</string>
+    <string name="database_on">Database</string>
+    <string name="database_off">Send</string>
+    <string name="title_sensor_select">Selected sensors</string>
+    <string name="title_extern_accel">Use extern acceleration sensor</string>
+    <string name="title_mode_select">Database mode</string>
+    <string name="active">active</string>
+    <string name="inactive">inactive</string>
+    <string name="not_available">not available</string>
+    
+    <!-- Main Activity TextureRecognizerActivity -->
+    <string name="textview_instructions_start">Start the textured surface analysis app by pressing the play button.</string>
+    <string name="button_new_texture">New Entry</string>
+    <string name="button_add_to_entry">Add to existing Texture</string>
+    
+    <!-- SensorCalibrationActivity -->
+    <string name="calibration">calibration</string>
+    <string name="textview_instructions_calib_1">Put your phone screen down on a flat surface to start the calibration and get the offset values.\n\nMinimum Delay for the accelerometer: %1$d ms \nMinimum Delay for the Gyroscope: %1$d ms\n</string>
+    <string name="textview_offsetX">Offset X: </string>
+    <string name="textview_offsetY">Offset Y: </string>
+    <string name="textview_offsetZ">Offset Z: </string>
+    <string name="empty">\n</string>
+    <string name="textview_instructions_calib_2">\nCalibration finished. Pick up your phone and press the OK Button to continue.\n</string>
+    <string name="button_ok">OK</string>
+    <string name="gapFiller_before">before</string>
+    <string name="gapFiller_after">after</string>
+    <string name="gapFiller_camera_1">the first</string>
+    <string name="gapFiller_camera_2">the second</string>
+  
+    <!-- general -->
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="ok">OK</string>
+    <string name="close">Close App</string>
+    
+    <!-- Images -->
+    <string name="image_description_logo">Logo</string>
+
+</resources>
