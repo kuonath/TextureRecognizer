@@ -9,11 +9,11 @@ import android.os.Bundle;
 
 public class DialogContinueFragment extends DialogFragment {
 	
-	private int step;
-	private String messagePart1;
+	private String mStep;
+	private String mMessagePart1;
 	
-	public DialogContinueFragment(int step) {
-		this.step = step;
+	public DialogContinueFragment(String step) {
+		mStep = step;
 	}
 	
 	@Override
@@ -21,27 +21,27 @@ public class DialogContinueFragment extends DialogFragment {
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		
-		switch(step) {
-			case 1:
-				messagePart1 = getString(R.string.next_camera);
+		switch(mStep) {
+			case SensorCalibrationActivity.class.getSimpleName():
+				mMessagePart1 = getString(R.string.next_camera);
 				break;
-			case 2:
-				messagePart1 = getString(R.string.next_logging);
+			case CameraActivity.class.getSimpleName():
+				mMessagePart1 = getString(R.string.next_logging);
 				break;
 		}
 		
-		builder.setMessage(messagePart1 + "\n" + getString(R.string.message_continue))
-		   	   .setPositiveButton(R.string.button_yes, new DialogInterface.OnClickListener() {
+		builder.setMessage(mMessagePart1 + "\n" + getString(R.string.message_continue))
+		   	   .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 			
 			  	   @Override
 		 		   public void onClick(DialogInterface dialog, int which) {
 			  		   
-			  		   switch(step) {
-			  		   		case 1:
+			  		   switch(mStep) {
+			  		   		case SensorCalibrationActivity.class.getSimpleName():
 			  		   			Intent intentCam = new Intent(getActivity(), CameraActivity.class);
 			  		   			startActivity(intentCam);
 			  		   			break;
-			  		   		case 2:
+			  		   		case CameraActivity.class.getSimpleName():
 			  		   			Intent intentLogging = new Intent(getActivity(), SensorLoggingActivity.class);
 			  		   			startActivity(intentLogging);
 			  		   			break;
@@ -49,23 +49,7 @@ public class DialogContinueFragment extends DialogFragment {
 			  		   getActivity().finish();
 		   		   }
 		   	   })
-		   	   /*.setNeutralButton(R.string.button_skip, new DialogInterface.OnClickListener() {
-				
-		   		   @Override
-			   	   public void onClick(DialogInterface dialog, int which) {
-		   			   
-		   			   switch(step) {
-		   			   case 1:
-		   				   Intent intentLogging = new Intent(getActivity(), SensorLoggingActivity.class);
-		   				   startActivity(intentLogging);
-		   				   break;
-		   			   case 2:
-		   				   showMailDialog();
-		   				   break;
-		   			   }
-			   	   }
-			   })*/
-		   	   .setNegativeButton(R.string.button_no, new DialogInterface.OnClickListener() {
+		   	   .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
 				
 		   		   @Override
 			   	   public void onClick(DialogInterface dialog, int which) {

@@ -42,6 +42,31 @@
     <string name="gapFiller_after">after</string>
     <string name="gapFiller_camera_1">the first</string>
     <string name="gapFiller_camera_2">the second</string>
+    
+    <!-- CameraActivity -->
+    <string name="taking">taking </string>
+    <string name="picture">picture?</string>
+    <string name="textview_instructions_camera_1">Take two pictures now!</string>
+    <string name="textview_instructions_camera_2">Picture taken. Please click OK to proceed with sensor logging.</string>
+    <string name="message_open_failed">Could not open Camera. Please restart the App.</string>
+    <string name="message_picture_taken_1">First picture taken!</string>
+    <string name="message_picture_taken_2">Second picture taken! Now you can press on play button to proceed to next step!</string>
+    
+    <!-- SensorLoggingActivity -->
+    <string name="logging">logging</string>
+    <string name="waiting">Waiting</string>
+    <string name="checkbox_sensors_logging">Log sensors</string>
+    <string name="checkbox_audio_logging">Record audio</string>
+    <string name="no_box_checked">Please make sure at least one of checkboxes is checked before you start.</string>
+    <string name="warning_logging">WARNING! No sensors being logged! Please start again, but this time choose particular sensors from the preference list.</string>
+    <string name="status_logging">Currently logging! Click on the button to stop logging.</string>
+    <string name="details_logging">\nSensor sampling rate = %1$d Hz\nStorage path = %2$s\n</string>
+    <string name="textview_instructions_logging_1">To start logging the sensors press the Camera Button. Right after the vibration signal, sweep the tip across the texture for 7s to record the
+sensor data and audio until there is another vibration.</string>
+	<string name="textview_instructions_logging_2"> </string>
+	<string name="textview_instructions_logging_3">Logging finished. Please press the OK Button to continue and finish data collection. You can now send the data via E-Mail to a Computer to process the data and analyse the texture.</string>
+	<string name="textview_magn_data_length">Number of samples for the magnetic sensor: %1$d\n</string>
+	<string name="button_features">Extract Features</string>
   
     <!-- Cancel Dialog -->
     <string name="message_dialog_cancel">Do you really want to cancel %1$s ? \nIf yes, do you want to keep the data you recorded so far or do you want it to be deleted?</string>
@@ -50,11 +75,19 @@
     <string name="checkbox_keep_data_not_analyzed">keep recorded data (adds _not_analyzed to the respective folder name)</string>
     <string name="checkbox_delete_data">Delete recorded data</string>
     
+    <!-- Continue Dialog  -->
+    <string name="next_camera">The next step will be for you to take a photo of the texture.</string>
+    <string name="next_logging">The next step will be the recording of sensor data and audio."</string>
+    <string name="message_continue">Do you want to continue?</string>
+    
     <!-- general -->
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ok">OK</string>
     <string name="close">Close App</string>
+    <string name="stop">Stop</string>
+	<string name="finish">Finish</string>
+	<string name="skip">Skip</string>
     
     <!-- Images -->
     <string name="image_description_logo">Logo</string>

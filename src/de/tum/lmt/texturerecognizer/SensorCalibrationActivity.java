@@ -25,9 +25,6 @@ public class SensorCalibrationActivity extends Activity implements SensorEventLi
 
 	private static final String TAG = SensorCalibrationActivity.class.getSimpleName();
 	
-	//Constants
-	private static final int STEP = 1;
-	
 	//UI Elements
 	private ImageButton buttonOkCalib;
 	private ImageButton buttonCancelCalib;
@@ -132,7 +129,7 @@ public class SensorCalibrationActivity extends Activity implements SensorEventLi
 
 	protected void showContinueDialog() {
 
-		DialogFragment continueDialog = new DialogContinueFragment(STEP);
+		DialogFragment continueDialog = new DialogContinueFragment(TAG);
 		continueDialog.show(getFragmentManager(), "DialogContinueFragment");
 	}
 
