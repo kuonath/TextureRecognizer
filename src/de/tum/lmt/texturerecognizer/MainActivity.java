@@ -26,20 +26,18 @@ public class MainActivity extends Activity implements DialogSensorFragment.iOnDi
 
 	private static final String TAG = MainActivity.class.getSimpleName();
 
+	//onActivityResult()
 	private static final int SETTINGS_CODE = 0;
 	
+	//UI Elements
 	private ImageButton mButtonStart;
 	private Button mButtonNewTexture;
 	private Button mButtonAddToEntry;
 	private ImageButton mButtonSettings;
+	
 	private static boolean mPrefMode = false;
 	private String mPathToStorage;
-	private static String mPrefPathToStorage;
 	private static File mLoggingDir;
-	private static String[] sensorNames;
-	private static int numberOfSensorsToLog = 0;//sensorNames.length;
-	private static int mPrefSensorSpeed;
-	public static File file;
 	
 	private boolean mAccelAvailable = false;
 	private boolean mGravAvailable = false;
@@ -112,8 +110,6 @@ public class MainActivity extends Activity implements DialogSensorFragment.iOnDi
     @Override
 	protected void onResume() {
 		super.onResume();
-
-		//updatePrefs();
 
 		mButtonStart = (ImageButton) findViewById(R.id.button_start);
 		mButtonStart.setOnClickListener(new OnClickListener() {
@@ -221,20 +217,23 @@ public class MainActivity extends Activity implements DialogSensorFragment.iOnDi
 	private File loggingDir() {
 		File dir;
 
-		mPathToStorage = mPrefPathToStorage;
+		mPathToStorage = Constants.PATH_TO_STORAGE;
 		String prefix = Environment.getExternalStorageDirectory().getPath();
 		mPathToStorage =  prefix + "/" + mPathToStorage;
 
 		if(!mPrefMode) {
-			mPathToStorage += Constants.ANALYSIS_FOLDER_NAME;
+			mPathToStorage.concat(Constants.ANALYSIS_FOLDER_NAME);
 		}
 		else {
-			mPathToStorage += Constants.DATABASE_FOLDER_NAME;
+			mPathToStorage.concat(Constants.DATABASE_FOLDER_NAME);
 		}
 
 		File logPath = new File(mPathToStorage);
-		if (!logPath.exists())
+		
+		if (!logPath.exists()) {
 			logPath.mkdirs();
+		}
+		
 		if(!logPath.exists())
 		{
 			((TextView) findViewById(R.id.textview_error)).setText("Not logging! Storage directory " + logPath.getPath() + 
@@ -341,19 +340,9 @@ public class MainActivity extends Activity implements DialogSensorFragment.iOnDi
 		return mPrefMode;
 	}
 
-	public static int getPrefSensorSpeed() {
-		return mPrefSensorSpeed;
-	}
-
-	public static String[] getSensorNames() {
-		return sensorNames;
-	}
-
-	public static String getPrefPathToStorage() {
+	//moved to Constants.PATH_TO_STORAGE
+	/*public static String getPrefPathToStorage() {
 		return mPrefPathToStorage;
-	}
+	}*/
 
-	public static int getNumberOfSensorsToLog() {
-		return numberOfSensorsToLog;
-	}
 }

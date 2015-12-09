@@ -12,8 +12,9 @@ public class Constants {
 	public static final String PREF_KEY_MODE_SELECT = "pref_key_mode_select";
 	
 	//Files and Paths
-	public final static String ANALYSIS_FOLDER_NAME = "/Analysis/";
-	public final static String DATABASE_FOLDER_NAME = "/Database";
+	public static final String PATH_TO_STORAGE = "Log/";
+	public static final String ANALYSIS_FOLDER_NAME = "/Analysis/";
+	public static final String DATABASE_FOLDER_NAME = "/Database";
 	
 	//Calibration Activity
 	public static boolean GRAVITY_NOT_PRESENT;

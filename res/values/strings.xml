@@ -43,6 +43,13 @@
     <string name="gapFiller_camera_1">the first</string>
     <string name="gapFiller_camera_2">the second</string>
   
+    <!-- Cancel Dialog -->
+    <string name="message_dialog_cancel">Do you really want to cancel %1$s ? \nIf yes, do you want to keep the data you recorded so far or do you want it to be deleted?</string>
+    <string name="message_dialog_cancel_database">Do you really want to cancel %1$s ? The data you have recorded so far will be deleted.</string>
+    <string name="checkbox_keep_data_unfinished">keep recorded data (adds _unfinished to the respective folder name)</string>
+    <string name="checkbox_keep_data_not_analyzed">keep recorded data (adds _not_analyzed to the respective folder name)</string>
+    <string name="checkbox_delete_data">Delete recorded data</string>
+    
     <!-- general -->
     <string name="yes">Yes</string>
     <string name="no">No</string>
