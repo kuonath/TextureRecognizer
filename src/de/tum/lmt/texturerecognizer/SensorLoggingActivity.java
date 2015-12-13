@@ -237,8 +237,6 @@ public class SensorLoggingActivity extends Activity {
 		if(!mSensorLoggingDir.exists()) {
 			mSensorLoggingDir.mkdirs();
 		}
-		
-		mPrefPathToStorage = Constants.PATH_TO_STORAGE;
 
 		mButtonOkLogging.setEnabled(false);
 		mButtonOkLogging.setClickable(false);

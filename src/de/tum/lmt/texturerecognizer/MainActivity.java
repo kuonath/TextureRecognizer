@@ -215,10 +215,10 @@ public class MainActivity extends Activity implements DialogSensorFragment.iOnDi
 		mPathToStorage =  prefix + "/" + mPathToStorage;
 
 		if(!mPrefMode) {
-			mPathToStorage.concat(Constants.ANALYSIS_FOLDER_NAME);
+			mPathToStorage = mPathToStorage.concat(Constants.ANALYSIS_FOLDER_NAME);
 		}
 		else {
-			mPathToStorage.concat(Constants.DATABASE_FOLDER_NAME);
+			mPathToStorage = mPathToStorage.concat(Constants.DATABASE_FOLDER_NAME);
 		}
 
 		File logPath = new File(mPathToStorage);
