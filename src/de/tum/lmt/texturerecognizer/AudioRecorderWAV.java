@@ -9,15 +9,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 //From http://www.edumobile.org/android/audio-recording-in-wav-format-in-android-programming/
 
 public class AudioRecorderWAV {
 
+	private Context mContext;
+	
 	private File loggingDir = MainActivity.getLoggingDir();
 	private String dataToSendPath = MainActivity.getLoggingDir().getAbsolutePath() + Constants.DATA_TO_SEND_FOLDER_NAME;
 	private File dataToSendDir;
@@ -39,7 +44,10 @@ public class AudioRecorderWAV {
 	private boolean isRecording = false;
 	private String TAG = "AudioRecorderWAV";
 
-	public AudioRecorderWAV() {
+	public AudioRecorderWAV(Context context) {
+		
+		mContext = context;
+		
 		if (channels_num == 1) {
 			Log.i(TAG, "NumChannels " + channels_num);
 			RECORDER_CHANNELS = AudioFormat.CHANNEL_IN_MONO;
@@ -154,7 +162,11 @@ public class AudioRecorderWAV {
 		}
 
 		copyWaveFile(getTempFilename(),getFilename());
-		if(!MainActivity.getPrefMode()) {
+		
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+		boolean mode = sharedPrefs.getBoolean(Constants.PREF_KEY_MODE_SELECT, false);
+		
+		if(!mode) {
 			copyWaveFile(getTempFilename(), getFilename1());
 			copyWaveFile(getTempFilename(), getFilename2());
 		}	

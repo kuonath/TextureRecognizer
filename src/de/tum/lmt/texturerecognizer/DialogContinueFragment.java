@@ -22,10 +22,10 @@ public class DialogContinueFragment extends DialogFragment {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		
 		switch(mStep) {
-			case SensorCalibrationActivity.class.getSimpleName():
+			case Constants.CALIBRATION:
 				mMessagePart1 = getString(R.string.next_camera);
 				break;
-			case CameraActivity.class.getSimpleName():
+			case Constants.CAMERA:
 				mMessagePart1 = getString(R.string.next_logging);
 				break;
 		}
@@ -37,11 +37,11 @@ public class DialogContinueFragment extends DialogFragment {
 		 		   public void onClick(DialogInterface dialog, int which) {
 			  		   
 			  		   switch(mStep) {
-			  		   		case SensorCalibrationActivity.class.getSimpleName():
+			  		   		case Constants.CALIBRATION:
 			  		   			Intent intentCam = new Intent(getActivity(), CameraActivity.class);
 			  		   			startActivity(intentCam);
 			  		   			break;
-			  		   		case CameraActivity.class.getSimpleName():
+			  		   		case Constants.CAMERA:
 			  		   			Intent intentLogging = new Intent(getActivity(), SensorLoggingActivity.class);
 			  		   			startActivity(intentLogging);
 			  		   			break;
@@ -60,10 +60,10 @@ public class DialogContinueFragment extends DialogFragment {
 		return builder.create();
 	}
 	
-	protected void showMailDialog() {
+	/*protected void showMailDialog() {
 		
 		DialogFragment mailDialog = new DialogMailFragment();
 		mailDialog.show(getFragmentManager(), "DialogMailFragment");
-	}
+	}*/
 	
 }

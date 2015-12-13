@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -18,7 +19,9 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Surface;
 import android.view.View;
@@ -55,6 +58,8 @@ public class CameraActivity extends Activity{
 	private int mFrameWidth;
 	private int mFrameHeight;
 	
+	private Handler mTimerHandler;
+	
 	private String mGapFiller;
 	
 	private Vibrator mVibrator;
@@ -78,7 +83,7 @@ public class CameraActivity extends Activity{
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_camera);
-
+		
 		mInstructions2 = (TextView) findViewById(R.id.textview_instructions_camera_2);
 
 		initializePictureCallback();
@@ -104,7 +109,7 @@ public class CameraActivity extends Activity{
 			@Override
 			public void onClick(View v) {
 				if(mCamera != null) {
-					mCamera.takePicture(null, null, mPicture);
+					takePicture();
 				}
 			}
 		});
@@ -114,7 +119,11 @@ public class CameraActivity extends Activity{
 
 			@Override
 			public void onClick(View v) {
-				if(!MainActivity.getPrefMode()) {
+				
+				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+				boolean mode = sharedPrefs.getBoolean(Constants.PREF_KEY_MODE_SELECT, false);
+				
+				if(!mode) {
 					showContinueDialog();
 				}
 				else {
@@ -150,7 +159,9 @@ public class CameraActivity extends Activity{
 	}
 	
 	
-	
+	private void takePicture() {
+		mCamera.takePicture(null, null, mPicture);
+	}
 	
 	private void initializePictureCallback() {
 		Log.i(TAG, "Calling initializePictureCallback");
@@ -206,17 +217,33 @@ public class CameraActivity extends Activity{
 					mInstructions2.setText(getString(R.string.message_picture_taken_2));
 				}
 
-				mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
-				mVibrator.vibrate(200);
-
 				mCamera.startPreview();
 
-				if(mNumberOfPicturesTaken == 2) {
+				if(mNumberOfPicturesTaken == 1) {
+					
+					mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+					mVibrator.vibrate(200);
+					
+					mTimerHandler = new Handler();
+					
+					mTimerHandler.postDelayed( new Runnable() {
+						@Override
+						public void run() {
+							takePicture();;
+						}
+					}, Constants.DURATION_BREAK_PICTURE);
+					
+				} else if(mNumberOfPicturesTaken == 2) {
+					
+					mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+					mVibrator.vibrate(200);
 
 					mButtonOkCamera.setEnabled(true);
 					mButtonOkCamera.setClickable(true);
 					mButtonCamera.setEnabled(false);					
+					mButtonCamera.setClickable(false);
 					
 					rotatePicture(mLoggingDir.getAbsolutePath() + "/" + Constants.CAMERA_NO_FLASH_FILENAME + Constants.JPG_FILE_EXTENSION);
 					rotatePicture(mLoggingDir.getAbsolutePath() + "/" + Constants.CAMERA_FLASH_FILENAME + Constants.JPG_FILE_EXTENSION);
@@ -265,10 +292,6 @@ public class CameraActivity extends Activity{
 		
 	}
 
-	
-
-
-
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -284,12 +307,12 @@ public class CameraActivity extends Activity{
 	}
 
 	protected void showCancelDialog(String gapFiller) {
-		DialogFragment cancelDialog = new DialogCancelFragment(gapFiller, mPictureTaken);
+		DialogFragment cancelDialog = new DialogCancelFragment(getBaseContext(), gapFiller, mPictureTaken);
 		cancelDialog.show(getFragmentManager(), "DialogCancelFragment");
 	}
 
 	protected void showContinueDialog() {
-		DialogFragment continueDialog = new DialogContinueFragment(TAG);
+		DialogFragment continueDialog = new DialogContinueFragment("camera");
 		continueDialog.show(getFragmentManager(), "DialogContinueFragment");
 	}
 

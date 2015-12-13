@@ -60,13 +60,15 @@
     <string name="no_box_checked">Please make sure at least one of checkboxes is checked before you start.</string>
     <string name="warning_logging">WARNING! No sensors being logged! Please start again, but this time choose particular sensors from the preference list.</string>
     <string name="status_logging">Currently logging! Click on the button to stop logging.</string>
-    <string name="details_logging">\nSensor sampling rate = %1$d Hz\nStorage path = %2$s\n</string>
     <string name="textview_instructions_logging_1">To start logging the sensors press the Camera Button. Right after the vibration signal, sweep the tip across the texture for 7s to record the
 sensor data and audio until there is another vibration.</string>
 	<string name="textview_instructions_logging_2"> </string>
 	<string name="textview_instructions_logging_3">Logging finished. Please press the OK Button to continue and finish data collection. You can now send the data via E-Mail to a Computer to process the data and analyse the texture.</string>
 	<string name="textview_magn_data_length">Number of samples for the magnetic sensor: %1$d\n</string>
 	<string name="button_features">Extract Features</string>
+	
+	<!-- Logging -->
+	<string name="sensor_missing">Sensor(s) missing!</string>
   
     <!-- Cancel Dialog -->
     <string name="message_dialog_cancel">Do you really want to cancel %1$s ? \nIf yes, do you want to keep the data you recorded so far or do you want it to be deleted?</string>
@@ -79,6 +81,15 @@ sensor data and audio until there is another vibration.</string>
     <string name="next_camera">The next step will be for you to take a photo of the texture.</string>
     <string name="next_logging">The next step will be the recording of sensor data and audio."</string>
     <string name="message_continue">Do you want to continue?</string>
+    
+    <!-- Bluetooth -->
+	<string name="toast_enabled_bt">Bluetooth enabled</string>
+	<string name="toast_error_bt">Could not enable Bluetooth</string>
+	<string name="message_devices">Please choose the device you want to connect with</string>
+	<string name="title_paired_devices">paired devices:</string>
+	<string name="title_new_devices">new devices:</string>
+	<string name="none_paired">none paired</string>
+	<string name="button_scan">Scan</string>
     
     <!-- general -->
     <string name="yes">Yes</string>

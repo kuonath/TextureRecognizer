@@ -45,13 +45,6 @@ public class MainActivity extends Activity implements DialogSensorFragment.iOnDi
 	private boolean mMagnetAvailable = false;
 	private boolean mRotVecAvailable = false;
 	
-	private boolean mUseAccel = false;
-	private boolean mUseGrav = false;
-	private boolean mUseGyro = false;
-	private boolean mUseMagnet = false;
-	private boolean mUseRotVec = false;
-	private boolean mUseExternAccel = false;
-	
 	@Override
 	public void onFinishSensorDialog(String buttonClicked) {
 		
@@ -59,7 +52,7 @@ public class MainActivity extends Activity implements DialogSensorFragment.iOnDi
             finish();
         } else if (buttonClicked.equals(getString(R.string.ok))) {
             
-        	updateSettings();
+        	//updateSettings();
         }
 	}
 	
@@ -187,11 +180,11 @@ public class MainActivity extends Activity implements DialogSensorFragment.iOnDi
     
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     	
-    	if(requestCode == SETTINGS_CODE) {
+    	/*if(requestCode == SETTINGS_CODE) {
     		
     		updateSettings();
     		
-    	}
+    	}*/
     }
 
 	protected void showNewEntryDialog(File dir) {
@@ -272,7 +265,8 @@ public class MainActivity extends Activity implements DialogSensorFragment.iOnDi
 				+get2DigitString(rightNow.get(Calendar.SECOND)));
 	}
 	
-	private void updateSettings() {
+	//not needed in current version, because other activities access shared preferences directly
+	/*private void updateSettings() {
 		
 		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -324,7 +318,7 @@ public class MainActivity extends Activity implements DialogSensorFragment.iOnDi
         } else {
         	mPrefMode = false;
         }
-	}
+	}*/
 
 	boolean checked = false;
 
@@ -334,10 +328,6 @@ public class MainActivity extends Activity implements DialogSensorFragment.iOnDi
 
 	public static void setLoggingDir(File file) {
 		mLoggingDir = file;
-	}
-
-	public static boolean getPrefMode() {
-		return mPrefMode;
 	}
 
 	//moved to Constants.PATH_TO_STORAGE

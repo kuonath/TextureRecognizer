@@ -5,14 +5,19 @@ import java.io.File;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 
 public class DialogCancelFragment extends DialogFragment {
+	
+	Context mContext;
 	
 	private File mLoggingDir = MainActivity.getLoggingDir();
 	
@@ -23,8 +28,9 @@ public class DialogCancelFragment extends DialogFragment {
 	private String mGapFiller;
 	private boolean mFinalValues;
 	
-	public DialogCancelFragment(String gapFiller, boolean finalValues) {
+	public DialogCancelFragment(Context context, String gapFiller, boolean finalValues) {
 		
+		mContext = context;
 		mGapFiller = gapFiller;
 		mFinalValues = finalValues;
 	}
@@ -65,13 +71,16 @@ public class DialogCancelFragment extends DialogFragment {
 			}
 		});
 		
-		if(MainActivity.getPrefMode()) {
+		SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+		boolean mode = sharedPrefs.getBoolean(Constants.PREF_KEY_MODE_SELECT, false);
+		
+		if(mode) {
 			mCheckboxKeepData.setVisibility(View.GONE);
 			mCheckboxDeleteData.setVisibility(View.GONE);
 		}
 		
 		builder.setView(content);
-		if(!MainActivity.getPrefMode()) {
+		if(!mode) {
 			builder.setMessage(getString((R.string.message_dialog_cancel), mGapFiller));
 		}
 		else {

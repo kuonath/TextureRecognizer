@@ -4,9 +4,12 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,9 +19,12 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,62 +40,55 @@ public class SensorLoggingActivity extends Activity {
 	//Bluetooth
 	private static final int REQUEST_ENABLE_BT = 0;
 	
-	private File parentLoggingDir = MainActivity.getLoggingDir();
-	private String sensorLoggingPath;// = parentLoggingDir.getAbsolutePath() + File.separator + Constants.sensorLogginFolderName;
-	private File sensorLoggingDir;
+	private File mParentLoggingDir = MainActivity.getLoggingDir();
+	private String mSensorLoggingPath;
+	private File mSensorLoggingDir;
 	private Map<Integer,String> mMap;
-	List<SensorDataWrapper> wrapperList = new ArrayList<SensorDataWrapper>();
-	// a couple of native libraries for sensor processing
 
-	/** A native method that is implemented by the
-	 * native library, which is packaged
-	 * with this application.
-	 */
-	public native void startLoggingSensorNDK(String dir, int sensorSpeed, double[] offsetValues, String[] sensorNames, int numberSensorsToLog);
-
-	/**
-	 * a native library method to stop logging, finishes writing data into files 
-	 */
-	public native void stopLoggingSensorNDK();
+	//Sensors
+	LoggingSensorListener mListener;
+	SensorLog mAccelLog;
+	SensorLog mAccelMinusOffsetLog;
+	SensorLog mGravLog;
+	SensorLog mGyroLog;
+	SensorLog mMagnetLog;
+	SensorLog mRotVecLog;
 	
-	/* this is used to load the 'logger' library on application
-	 * startup. The library has already been unpacked into logger
-	 */
-	static {
-		System.loadLibrary(Constants.nameNativeLibrary);
-	}
+	//Audio
+	private AudioRecorderWAV mRecorder;
 
-	private AudioRecorderWAV recorder;
+	//UI Elements
+	private CheckBox mCheckboxSensorsLogging;
+	private CheckBox mCheckboxAudioLogging;
+	private ImageButton mButtonStartLogging;
+	private ImageButton mButtonStopLogging;
+	private ImageButton mButtonOkLogging;
+	private ImageButton mButtonCancelLogging;
+	private TextView mDescription1;
+	private TextView mDescription2;
+	private TextView mDescription3;
 
-	private CheckBox checkboxSensorsLogging;
-	private CheckBox checkboxAudioLogging;
-
-	private ImageButton buttonStartLogging;
-	private ImageButton buttonStopLogging;
-	private ImageButton buttonOkLogging;
-	private ImageButton buttonCancelLogging;
-
-	private TextView description1;
-	private TextView description2;
-	private TextView description3;
-
-	private Vibrator vibrator;
-
+	//Prefs
+	private String mPrefPathToStorage;
+	private int mPrefSensorSpeed;
+	
 	private boolean mIsLogging = false;
 	private boolean mLoggingFinished = false;
 
-	private String mPrefPathToStorage;
-	private int mPrefSensorSpeed;
+	//Sensors
 	private String[] sensorNames;
 	private int numberOfSensorsToLog = 0;
 
 	private File mActivityStreamFile;
 	private BufferedOutputStream mOutActivity;
 
+	//Timers
 	private Handler mTimerHandler;
 	private Handler mTimedUpdateHandler;
 	private Runnable mTimedUpdateRunnable;
 
+	private Vibrator mVibrator;
+	
 	private String mGapFiller;
 
 	// init data
@@ -107,53 +106,51 @@ public class SensorLoggingActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_logging);
 
-		sensorLoggingPath = parentLoggingDir.getAbsolutePath() + File.separator + Constants.SENSOR_LOGGING_FOLDER_NAME;
+		mSensorLoggingPath = mParentLoggingDir.getAbsolutePath() + File.separator + Constants.SENSOR_LOGGING_FOLDER_NAME;
 
-		vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
-		recorder = new AudioRecorderWAV();
+		mRecorder = new AudioRecorderWAV(getBaseContext());
 
-		sensorLoggingDir = new File(sensorLoggingPath);
+		mSensorLoggingDir = new File(mSensorLoggingPath);
 
 		mTimerHandler = new Handler();
 
-		checkboxSensorsLogging = (CheckBox) findViewById(R.id.checkbox_sensors_logging);
-		checkboxAudioLogging = (CheckBox) findViewById(R.id.checkbox_audio_logging);
+		mCheckboxSensorsLogging = (CheckBox) findViewById(R.id.checkbox_sensors_logging);
+		mCheckboxAudioLogging = (CheckBox) findViewById(R.id.checkbox_audio_logging);
 
-		description1 = (TextView) findViewById(R.id.textview_instructions_logging_1);
-		description2 = (TextView) findViewById(R.id.textview_instructions_logging_2);
-		description3 = (TextView) findViewById(R.id.textview_instructions_logging_3);
+		mDescription1 = (TextView) findViewById(R.id.textview_instructions_logging_1);
+		mDescription2 = (TextView) findViewById(R.id.textview_instructions_logging_2);
+		mDescription3 = (TextView) findViewById(R.id.textview_instructions_logging_3);
 
-		buttonStartLogging = (ImageButton) findViewById(R.id.button_start_logging);
-		buttonStartLogging.setOnClickListener(new OnClickListener() {
+		mButtonStartLogging = (ImageButton) findViewById(R.id.button_start_logging);
+		mButtonStartLogging.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
 
-				description2.setText("Preparing sensors...");
+				mDescription2.setText("Preparing sensors...");
 
 				mTimerHandler.postDelayed( new Runnable() {
 					@Override
 					public void run() {
 						startLogging();
 					}
-				}, Constants.DURATION_TO_LOG);
+				}, Constants.DURATION_WAIT);
 			}
 		});
 
-		buttonStopLogging = (ImageButton) findViewById(R.id.button_stop_logging);
-		buttonStopLogging.setOnClickListener(new OnClickListener() {
+		mButtonStopLogging = (ImageButton) findViewById(R.id.button_stop_logging);
+		mButtonStopLogging.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
 
 				stopLogging();
 				
-				
-				
 			}
 		});
 
-		buttonOkLogging = (ImageButton) findViewById(R.id.button_features_logging);
-		buttonOkLogging.setOnClickListener(new OnClickListener() {
+		mButtonOkLogging = (ImageButton) findViewById(R.id.button_features_logging);
+		mButtonOkLogging.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
 
@@ -161,8 +158,8 @@ public class SensorLoggingActivity extends Activity {
 			}
 		});
 
-		buttonCancelLogging = (ImageButton) findViewById(R.id.button_cancel_logging);
-		buttonCancelLogging.setOnClickListener(new OnClickListener() {
+		mButtonCancelLogging = (ImageButton) findViewById(R.id.button_cancel_logging);
+		mButtonCancelLogging.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View v) {
 
@@ -176,25 +173,19 @@ public class SensorLoggingActivity extends Activity {
 				}
 			}
 		});
-		buttonOkLogging.setClickable(false);
-		// init stuff
-
-
-
-		mMap = new HashMap<Integer,String>();
-		for (int i=0; i<Constants.requiredSensorNames.length; i++) {
-			mMap.put(i, Constants.requiredSensorNames[i]);
-		}
+		
+		mButtonOkLogging.setEnabled(false);
+		mButtonOkLogging.setClickable(false);
 
 	}
 
 	protected void showFeaturesDialog() {
-		DialogFragment featuresDialog = new DialogFeaturesFragment();
-		featuresDialog.show(getFragmentManager(), "DialogFeaturesFragment");
+		//DialogFragment featuresDialog = new DialogFeaturesFragment();
+		//featuresDialog.show(getFragmentManager(), "DialogFeaturesFragment");
 	}
 
 	protected void showCancelDialog(String gapFiller) {
-		DialogFragment cancelDialog = new DialogCancelFragment(gapFiller, mLoggingFinished);
+		DialogFragment cancelDialog = new DialogCancelFragment(getBaseContext(), gapFiller, mLoggingFinished);
 		cancelDialog.show(getFragmentManager(), "DialogCancelFragment");
 	}
 
@@ -230,94 +221,59 @@ public class SensorLoggingActivity extends Activity {
 		return false;
 	}
 
-
 	private void stopLoggingNoSensors(String message) {
 		mLoggingFinished = false;
 
-		description2.setText("");
-		description3.setText("Something went wrong: " + message);
+		mDescription2.setText("");
+		mDescription3.setText("Something went wrong: " + message);
 		Toast.makeText(getApplicationContext(), "Sensor is missing " + message + ". Please check again.", Toast.LENGTH_LONG).show();
-		buttonOkLogging.setEnabled(true);
-		buttonOkLogging.setClickable(true);
-		buttonStopLogging.setEnabled(false);
+		mButtonOkLogging.setEnabled(true);
+		mButtonOkLogging.setClickable(true);
+		mButtonStopLogging.setEnabled(false);
 	}
-
 
 	private void startLogging() {
 
-		if(!sensorLoggingDir.exists()) {
-			sensorLoggingDir.mkdirs();
+		if(!mSensorLoggingDir.exists()) {
+			mSensorLoggingDir.mkdirs();
 		}
-		mPrefPathToStorage = MainActivity.getPrefPathToStorage();
-		mPrefSensorSpeed = MainActivity.getPrefSensorSpeed();
-		sensorNames = MainActivity.getSensorNames();
-		numberOfSensorsToLog = MainActivity.getNumberOfSensorsToLog();
+		
+		mPrefPathToStorage = Constants.PATH_TO_STORAGE;
 
-		buttonOkLogging.setEnabled(false);
+		mButtonOkLogging.setEnabled(false);
+		mButtonOkLogging.setClickable(false);
 
-		// check if sensor names has the sensors we need
+		if(!mIsLogging && !mLoggingFinished && (mCheckboxSensorsLogging.isChecked() || mCheckboxAudioLogging.isChecked())) {
+			Log.i(TAG, "logging sensors on native level to folder: " + mSensorLoggingDir.getAbsolutePath());
 
+			mVibrator.vibrate(500);
 
-		if (sensorNames == null) {
-			stopLoggingNoSensors("Sensor names null");
-			return;
-		}
-		if (sensorNames.length == 0) {
-			stopLoggingNoSensors("Sensors are empty");
-			return;
-		}
+			mButtonStartLogging.setEnabled(false);
+			mButtonStartLogging.setClickable(false);
+			mButtonStopLogging.setEnabled(true);
+			mButtonStopLogging.setClickable(true);
 
-		// check if we have accel stuff etc.
-		for (Integer mMapId : mMap.keySet()) {
-			if (!checkIfInsideStringArray(mMap.get(mMapId), sensorNames)) {
-				stopLoggingNoSensors(mMap.get(mMapId));
-				return;
-			}
-		}
-
-
-		if(!mIsLogging && !mLoggingFinished && (checkboxSensorsLogging.isChecked() || checkboxAudioLogging.isChecked()) && 
-				sensorNames.length>0) {
-			Log.i(TAG, "logging sensors on native level to folder: " + sensorLoggingDir.getAbsolutePath());
-
-			vibrator.vibrate(500);
-
-			buttonStartLogging.setEnabled(false);
-			buttonStopLogging.setEnabled(true);
-
-			if(checkboxAudioLogging.isChecked()) {
-				recorder.startRecording();
+			if(mCheckboxAudioLogging.isChecked()) {
+				mRecorder.startRecording();
 			}
 
-			if(checkboxSensorsLogging.isChecked()) {
-				startLoggingSensorNDK(sensorLoggingDir.getAbsolutePath(), mPrefSensorSpeed, SensorCalibrationActivity.mOffsetValues, 
-						sensorNames, numberOfSensorsToLog);
+			if(mCheckboxSensorsLogging.isChecked()) {
+				
+				SensorManager manager = (SensorManager) this.getSystemService(this.SENSOR_SERVICE);
+				
+				SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+				boolean useAccel = sharedPrefs.getBoolean(Constants.PREF_KEY_ACCEL_SELECT, false);
+				boolean useGrav = sharedPrefs.getBoolean(Constants.PREF_KEY_GRAV_SELECT, false);
+				boolean useGyro = sharedPrefs.getBoolean(Constants.PREF_KEY_GYRO_SELECT, false);
+				boolean useMagnet = sharedPrefs.getBoolean(Constants.PREF_KEY_MAGNET_SELECT, false);
+				boolean useRotVec = sharedPrefs.getBoolean(Constants.PREF_KEY_ROTVEC_SELECT, false);
+				boolean useExternAccel = sharedPrefs.getBoolean(Constants.PREF_KEY_EXTERN_ACCEL, false);
+								
+				mListener = new LoggingSensorListener(this, manager, useAccel, useGrav, useGyro, useMagnet, useRotVec, useExternAccel);
+				mListener.registerListener();
+				
+				mIsLogging = true;
 			}
-
-			mIsLogging = true;
-
-			int number_sensors = 0;
-			if (sensorNames!= null) {
-				number_sensors = sensorNames.length;
-			}
-
-			if (number_sensors == 0) {
-				description3.setText(R.string.warning_logging);
-			}
-			else {
-				description2.setText(R.string.status_logging);
-			}
-
-			// timed updating of interesting information
-			mTimedUpdateHandler = new Handler();
-			mTimedUpdateRunnable = new Runnable() {
-				@Override
-				public void run() {
-					description3.setText(getString(R.string.details_logging, mPrefSensorSpeed, mPrefPathToStorage));
-					mTimedUpdateHandler.postDelayed(this, 500);
-				}
-			};
-			mTimedUpdateHandler.postDelayed(mTimedUpdateRunnable, 500);
 
 			mTimerHandler.postDelayed( new Runnable() {
 				@Override
@@ -326,8 +282,8 @@ public class SensorLoggingActivity extends Activity {
 				}
 			}, Constants.DURATION_TO_LOG);
 		}
-		else if(!checkboxAudioLogging.isChecked() && !checkboxSensorsLogging.isChecked()) {
-			description2.setText(getString(R.string.no_box_checked));
+		else if(!mCheckboxAudioLogging.isChecked() && !mCheckboxSensorsLogging.isChecked()) {
+			mDescription2.setText(getString(R.string.no_box_checked));
 		}
 	}
 
@@ -335,175 +291,235 @@ public class SensorLoggingActivity extends Activity {
 
 		if(mIsLogging) {
 
-			description2.setText("Logging finished, parsing the necessary data...");
+			mDescription2.setText("Logging finished, parsing the necessary data...");
 
-			mTimedUpdateHandler.removeCallbacks(mTimedUpdateRunnable);
+			//mTimedUpdateHandler.removeCallbacks(mTimedUpdateRunnable);
 
-			vibrator.vibrate(500);
+			mVibrator.vibrate(500);
 
-			if(checkboxAudioLogging.isChecked()) {
-				recorder.stopRecording();
+			if(mCheckboxAudioLogging.isChecked()) {
+				mRecorder.stopRecording();
 			}
 
-			if(checkboxSensorsLogging.isChecked()) {
-				stopLoggingSensorNDK();
+			if(mCheckboxSensorsLogging.isChecked()) {
+				mListener.unregisterListener();
 			}
 
 			mIsLogging = false;
 			mLoggingFinished = true;
 
-			dropDataPoints();
+			getLoggingData();
+			
+			subtractOffsetFromAccelData();
+			
+			writeLoggingDataToFile();
+			
+			//dropDataPoints();
 
-			buttonOkLogging.setEnabled(true);
-			buttonOkLogging.setClickable(true);
-			buttonStopLogging.setEnabled(false);
+			mButtonOkLogging.setEnabled(true);
+			mButtonOkLogging.setClickable(true);
+			mButtonStopLogging.setEnabled(false);
+			mButtonStopLogging.setClickable(false);
 
-			description2.setText("");
-			description3.setText(getString(R.string.textview_instructions_logging_3));
-			
-			
-			
+			mDescription2.setText("");
+			mDescription3.setText(getString(R.string.textview_instructions_logging_3));
+		}
+	}
 	
+	private void getLoggingData() {
+		
+		if(mListener.getAccelLog() != null) {
+			mAccelLog = mListener.getAccelLog();
+		}
+		
+		if(mListener.getGravLog() != null) {
+			mGravLog = mListener.getGravLog();
+		}
+		
+		if(mListener.getGyroLog() != null) {
+			mGyroLog = mListener.getGyroLog();
+		}
+		
+		if(mListener.getMagnetLog() != null) {
+			mMagnetLog = mListener.getMagnetLog();
+		}
+		
+		if(mListener.getRotVecLog() != null) {
+			mRotVecLog = mListener.getRotVecLog();
+		}
+	}
+	
+	private void subtractOffsetFromAccelData() {
+		
+		if(!(mAccelLog.getType() == -1)) {
 			
-		}
-	}
-
-	private boolean checkIfInside(File file, ArrayList<Sensor> sensors) {
-		for (Sensor current : sensors) {
-			if (file.getName().contains(current.name)) {
-				return true;
+			mAccelMinusOffsetLog = new SensorLog(mAccelLog.getType());
+			
+			for(long timestamp : mAccelLog.getTimestamps()) {
+				mAccelMinusOffsetLog.addTimestamp(timestamp);
+				//Log.i("accellog", "timestamp added: " + timestamp);
+			}
+			
+			float[] valuesMinusOffset = new float[3];
+			
+			for(float[] values : mAccelLog.getValues()) {
+				valuesMinusOffset[0] = values[0] - (float) SensorCalibrationActivity.offsetValues[0];
+				valuesMinusOffset[1] = values[1] - (float) SensorCalibrationActivity.offsetValues[1];
+				valuesMinusOffset[2] = values[2] - (float) SensorCalibrationActivity.offsetValues[2];
+				
+				mAccelMinusOffsetLog.addValues(valuesMinusOffset);
 			}
 		}
-		return false;
 	}
-
-	private void dropDataPoints() {
-
-		File[] fileList = sensorLoggingDir.listFiles();
-
-		List<List<String>> sensorDataList = new ArrayList<List<String>>();
-
-		ArrayList<Sensor> sensors = new ArrayList<Sensor>();
-		for (Integer s : mMap.keySet()) {
-			sensors.add(new Sensor(s, mMap.get(s)));
-			sensorDataList.add(new ArrayList<String>());
-		}
-
-		for(File file : fileList)
-		{
-			if (file.length()==0) { // check if file has been filled up, if not then skip it
-				Log.e(TAG, "File " + file.getPath().toString() + " has zero length");
-				Toast.makeText(getBaseContext(), "File " + file.getPath().toString() + 
-						" has zero length. Maybe you need to disable it in sensor settings?..", Toast.LENGTH_LONG).show();
-				continue;
-			}
-
-			String tempString = null;
-			BufferedReader br = null;
-			Log.i(TAG, "File " + file);
-
-			if (checkIfInside(file, sensors)) {
+	
+	private void writeLoggingDataToFile() {
+		
+		if((mAccelMinusOffsetLog != null) && !(mAccelMinusOffsetLog.getType() == -1)) {
+			
+			String accelLogString = buildLogString(mAccelMinusOffsetLog);
+			
+			String accelFileString = mSensorLoggingDir.getAbsolutePath() + File.separator + "accel.txt";
+			File accelFile = new File(accelFileString);
+			
+			if(!accelFile.exists()) {
 				try {
-					br = new BufferedReader(new FileReader(file));
-
-					for (Sensor current : sensors) {
-						if (file.getName().contains(current.name)) {
-							while(((tempString = br.readLine()) != null)) {
-								sensorDataList.get(current.nameID).add(tempString);
-							}					
-						}
-					}
-				} catch (Throwable t) {
-					Log.e(TAG, "load()", t);
-				} finally {
-					if(br != null) {
-						try {
-							br.close();
-						} catch (IOException e) {
-							Log.e(TAG, "br.close()", e);
-						}
-					}
+					accelFile.createNewFile();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
-			else {
-				file.delete();
-			}
+			
+			writeStringToFile(accelFile, accelLogString);
 		}
-
-		//description2.setText(getString(R.string.textview_magn_data_length, sensorDataList.get(Constants.MAGNDATA).size()));
-
-		cropListsToSmallestSize(sensorDataList);
-
-		for(File file : fileList)
-		{
-			Log.i(TAG, "Now appending files, " + file);
-
-			// find if at least one is there			
-			if (checkIfInside(file, sensors)) {
-				for (int i=0; i<sensors.size(); i++) {
-					String name = sensors.get(i).name;
-					SensorDataWrapper m = wrapperList.get(i);
-					if (file.getName().contains(name)) {
-						writeToFile(file, name, m);
-					}
+		
+		if((mGravLog != null) && !(mGravLog.getType() == -1)) {
+			
+			String gravLogString = buildLogString(mGravLog);
+			
+			String gravFileString = mSensorLoggingDir.getAbsolutePath() + File.separator + "grav.txt";
+			File gravFile = new File(gravFileString);
+			
+			if(!gravFile.exists()) {
+				try {
+					gravFile.createNewFile();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-
-
 			}
+			
+			writeStringToFile(gravFile, gravLogString);
+		}
+		
+		if((mGyroLog != null) && !(mGyroLog.getType() == -1)) {
+			
+			String gyroLogString = buildLogString(mGyroLog);
+			
+			String gyroFileString = mSensorLoggingDir.getAbsolutePath() + File.separator + "gyro.txt";
+			File gyroFile = new File(gyroFileString);
+			
+			if(!gyroFile.exists()) {
+				try {
+					gyroFile.createNewFile();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			writeStringToFile(gyroFile, gyroLogString);
+		}
+		
+		if((mMagnetLog != null) && !(mMagnetLog.getType() == -1)) {
+			
+			String magnetLogString = buildLogString(mMagnetLog);
+			
+			String magnetFileString = mSensorLoggingDir.getAbsolutePath() + File.separator + "magnet.txt";
+			File magnetFile = new File(magnetFileString);
+			
+			if(!magnetFile.exists()) {
+				try {
+					magnetFile.createNewFile();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			writeStringToFile(magnetFile, magnetLogString);
+		}
+		
+		if((mRotVecLog != null) && !(mRotVecLog.getType() == -1)) {
+			
+			String rotVecLogString = buildLogString(mRotVecLog);
+			
+			String rotVecFileString = mSensorLoggingDir.getAbsolutePath() + File.separator + "rotvec.txt";
+			File rotVecFile = new File(rotVecFileString);
+			
+			if(!rotVecFile.exists()) {
+				try {
+					rotVecFile.createNewFile();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			writeStringToFile(rotVecFile, rotVecLogString);
 		}
 	}
-
-	boolean writeToFile(File file, String name, SensorDataWrapper m) {
-		// write to file
-		BufferedWriter bw = null;
+	
+	private String buildLogString(SensorLog log) {
+		
 		StringBuilder sb = new StringBuilder();
-		try {
-			bw = new BufferedWriter(new FileWriter(file));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			return false;
-		}
-		if((file.getName().contains(name))) {
-			for (int indexMeas=0; indexMeas<m.dataParsed.size(); indexMeas++) {
-				String s = m.dataParsed.get(indexMeas).toString() + "\n";
-				if (file.getName().contains(Constants.requiredSensorNames[Constants.ACCELDATA])) {
-					//Log.i(TAG, "Pushing to accel for " + file.getName().toString());
-					Constants.pushToAccelArray(m.dataParsed.get(indexMeas).meas_y);
-				}
-				sb.append(s);
+		
+		for(int i = 0; i < log.getTimestamps().size(); i++) {
+			
+			sb.append(Long.toString(log.getTimestamps().get(i)));
+			sb.append("\t");
+			sb.append(Float.toString(log.getValues().get(i)[0]));
+			sb.append("\t");
+			sb.append(Float.toString(log.getValues().get(i)[1]));
+			sb.append("\t");
+			sb.append(Float.toString(log.getValues().get(i)[2]));
+			sb.append("\n");
+			
+			if(i < 5) {
+				Log.i("build", "type: " + log.getType() + ", value: " + log.getValues().get(i)[0]);
 			}
-			try {
-				if(bw != null) {
-					bw.write(sb.toString());
-					bw.close();
-					return true;
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-				return false;
-			}		
 		}
-		return false;
+		
+		return sb.toString();
 	}
-
-	private void cropListsToSmallestSize(List<List<String>> sensorDataList) {
-
-		for(List<String> element : sensorDataList) {
-			SensorDataWrapper curr = new SensorDataWrapper(element);
-			curr.removeNonMonotonicData();
-			wrapperList.add(curr);
-			Log.i(TAG, "cropListsToSmallestSize Parsed sensor " + curr.dataParsed.size());
+	
+	private void writeStringToFile(File file, String logString) {
+		
+		FileOutputStream fOut = null;
+		try {
+			fOut = new FileOutputStream(file);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
-		long firstTS = wrapperList.get(0).dataParsed.get(0).ts;
-		for (SensorDataWrapper w : wrapperList) {
-			w.interpolate(Constants.period, Constants.durationInterested, firstTS, Constants.precision_to_write_sensor_data);
-			Log.i(TAG, "Parsed string array, duration " + w.timeDuration + ", size " + w.dataParsed.size());
+		OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+		try {
+			myOutWriter.append(logString);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
-		for (SensorDataWrapper w : wrapperList) {
-			w.check();
+		try {
+			myOutWriter.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
+		try {
+			fOut.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
