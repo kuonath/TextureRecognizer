@@ -82,6 +82,14 @@ sensor data and audio until there is another vibration.</string>
     <string name="next_logging">The next step will be the recording of sensor data and audio."</string>
     <string name="message_continue">Do you want to continue?</string>
     
+    <!-- Feature Dialog -->
+	<string name="textview_features">Extracting features &#8230;</string>
+	
+	<!-- Send Dialog -->
+	<string name="message_dialog_send">Choose one of the following options:</string>
+	<string name="checkbox_mail">E-Mail (not currently supported)</string>
+	<string name="checkbox_bluetooth">Bluetooth</string>
+    
     <!-- Bluetooth -->
 	<string name="toast_enabled_bt">Bluetooth enabled</string>
 	<string name="toast_error_bt">Could not enable Bluetooth</string>
@@ -99,6 +107,8 @@ sensor data and audio until there is another vibration.</string>
     <string name="stop">Stop</string>
 	<string name="finish">Finish</string>
 	<string name="skip">Skip</string>
+	<string name="send">Send</string>
+	<string name="cancel">Cancel</string>
     
     <!-- Images -->
     <string name="image_description_logo">Logo</string>

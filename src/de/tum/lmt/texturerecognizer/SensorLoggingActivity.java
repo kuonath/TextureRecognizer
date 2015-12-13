@@ -180,8 +180,8 @@ public class SensorLoggingActivity extends Activity {
 	}
 
 	protected void showFeaturesDialog() {
-		//DialogFragment featuresDialog = new DialogFeaturesFragment();
-		//featuresDialog.show(getFragmentManager(), "DialogFeaturesFragment");
+		DialogFragment featuresDialog = new DialogFeaturesFragment(getBaseContext(), mAccelMinusOffsetLog, mGravLog, mGyroLog, mMagnetLog, mRotVecLog);
+		featuresDialog.show(getFragmentManager(), "DialogFeaturesFragment");
 	}
 
 	protected void showCancelDialog(String gapFiller) {
@@ -355,7 +355,6 @@ public class SensorLoggingActivity extends Activity {
 			
 			for(long timestamp : mAccelLog.getTimestamps()) {
 				mAccelMinusOffsetLog.addTimestamp(timestamp);
-				//Log.i("accellog", "timestamp added: " + timestamp);
 			}
 			
 			float[] valuesMinusOffset = new float[3];
@@ -482,10 +481,6 @@ public class SensorLoggingActivity extends Activity {
 			sb.append("\t");
 			sb.append(Float.toString(log.getValues().get(i)[2]));
 			sb.append("\n");
-			
-			if(i < 5) {
-				Log.i("build", "type: " + log.getType() + ", value: " + log.getValues().get(i)[0]);
-			}
 		}
 		
 		return sb.toString();

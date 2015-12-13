@@ -1,5 +1,8 @@
 package de.tum.lmt.texturerecognizer;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Constants {
 
 	//Preferences
@@ -37,7 +40,7 @@ public class Constants {
 	
 	//SensorLoggingActivity
 	public final static long DURATION_WAIT = 2000;
-	public final static long DURATION_INTERESTED = 1000; // ms, 5s is fine
+	public final static long DURATION_INTERESTED = 6000; // ms, 5s is fine
 	public final static int PRECISION_TO_WRITE_SENSOR_DATA = 4;	// 4 digits after comma when writing sensor data to file 
 	public final static long DURATION_TO_LOG = DURATION_INTERESTED + 2000; // ms, because not instant
 	
@@ -49,8 +52,17 @@ public class Constants {
 	public static final int RECORDER_SAMPLING_RATE = 44100;
 	public static Byte[] SOUND_ARRAY;
 	
-	//Continue Dilaog
+	//Continue Dialog
 	public static final String CALIBRATION = "calibration";
 	public static final String CAMERA = "camera";
 	
+	//Features Dialog
+	public static final String BITMAP_NO_FLASH_FILENAME = "/" + CAMERA_NO_FLASH_FILENAME + JPG_FILE_EXTENSION;
+	public static final String BITMAP_FLASH_FILENAME = "/" + CAMERA_FLASH_FILENAME + JPG_FILE_EXTENSION;
+	public static final String TXT_SUFFIX_NAME = ".txt";
+	public static final String PARAMETERS_FILENAME = "parameters" + TXT_SUFFIX_NAME;
+	public static final String IMPACT_FILENAME = "/impact.wav";
+	
+	//Send Dialog
+	public static final List<String> NAMES_OF_BLUETOOTH_FILES_TO_SEND = Arrays.asList(new String[] { "macro", "parameters", "display", "sound", "impact" });
 }
