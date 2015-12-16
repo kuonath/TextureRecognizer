@@ -49,6 +49,16 @@
             android:label="Calibration">
         </activity>
         
+        <activity
+            android:name=".CameraActivity"
+            android:label="Camera">
+        </activity>
+        
+        <activity 
+            android:name=".SensorLoggingActivity"
+            android:label="Logging">
+        </activity>
+        
     </application>
 
 </manifest>

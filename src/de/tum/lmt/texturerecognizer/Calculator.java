@@ -2,6 +2,8 @@ package de.tum.lmt.texturerecognizer;
 
 import java.util.ListIterator;
 
+import android.util.Log;
+
 public class Calculator {
 
 	public double roundDigits(double toRound, int precision) {
@@ -51,6 +53,10 @@ public class Calculator {
 		
 		mean = mean / ((end.previousIndex() + 1) - beginIndex);
 		
+		while(begin.hasPrevious()) {
+			begin.previous();
+		}
+		
 		double variance = 0;
 		
 		for(ListIterator<Double> lit = begin; (lit.hasNext() && lit != end); ) {
@@ -63,7 +69,7 @@ public class Calculator {
 	}
 	
 	public double varianceFloat(ListIterator<Float> begin, ListIterator<Float> end) {
-		
+				
 		float mean = 0;
 		int beginIndex = begin.nextIndex();
 		
@@ -72,6 +78,10 @@ public class Calculator {
 		}
 		
 		mean = mean / ((end.previousIndex() + 1) - beginIndex);
+		
+		while(begin.hasPrevious()) {
+			begin.previous();
+		}
 		
 		double variance = 0;
 		
@@ -90,6 +100,8 @@ public class Calculator {
 		for(ListIterator<Float> lit = begin; (lit.hasNext() && lit != end); ) {
 			
 			double nextValue = lit.next();
+			
+			Log.i("Features", "nextValue: " + nextValue);
 			
 			if(nextValue > maxAbs) {
 				maxAbs = nextValue;

@@ -262,13 +262,13 @@ public class FeatureComputer {
 	}
 	
 	private void computeNoiseDistribution() {
-		
-		ListIterator<Double> itBegin = mSoundDataMovement.listIterator();
+				
+		ListIterator<Double> itBegin = mSoundDataMovement.listIterator(0);
 		ListIterator<Double> itEnd = mSoundDataMovement.listIterator(mSoundDataMovement.size()-1);
 		
 		double maxAbs = mCalculator.getAbsoluteMaximumDouble(itBegin, itEnd);
 		
-		Log.i("Features", "Max: " + maxAbs);
+		Log.i("Features", "Max Sound: " + maxAbs);
 		
 		double distThresh = 0.1 * maxAbs;
 		
@@ -276,6 +276,8 @@ public class FeatureComputer {
 		
 		int numberOfOnes = 0;
 		int numberOfZeros = 0;
+		
+		itBegin = mSoundDataMovement.listIterator(0);
 		
 		for(ListIterator<Double> lit = itBegin; (lit.hasNext() && lit != itEnd); ) {
 			
@@ -296,6 +298,9 @@ public class FeatureComputer {
 			mNoiseDistribution = 1.0;
 		}
 		
+		Log.i("Features", "noise distribution: " + mNoiseDistribution);
+
+		
 		mNoiseDistribution = 0.5;
 	}
 	
@@ -312,7 +317,8 @@ public class FeatureComputer {
 			mWeightMacro = 1.0;
 		}
 		
-		mWeightMacro = 0.4;
+		Log.i("Features", "mWeightMacro: " + mWeightMacro);
+		
 	}
 	
 	private void calculateWeightMicroRoughness() {
@@ -327,7 +333,8 @@ public class FeatureComputer {
 			mWeightMicro = 1.0;
 		}
 		
-		mWeightMicro = 0.4;
+		Log.i("Features", "mWeightMicro: " + mWeightMicro);
+		
 	}
 	
 	private void calculateWeightFineness() {
