@@ -170,6 +170,9 @@ public class CameraActivity extends Activity{
 			@Override
 			public void onPictureTaken(byte[] data, Camera camera) {
 
+				mButtonCamera.setClickable(false);
+				mButtonCamera.setEnabled(false);
+				
 				//save the picture 
 				File pictureFile = getOutputMediaFile();
 				if (pictureFile == null){

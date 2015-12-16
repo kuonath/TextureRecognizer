@@ -6,9 +6,17 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 import de.tum.lmt.texturerecognizer.DialogSensorFragment.iOnDialogButtonClickListener;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.util.Log;
 
 public class FeatureComputer {
@@ -20,6 +28,11 @@ public class FeatureComputer {
 	private boolean mDatabaseMode;
 	
 	private Bitmap mMacroImage;
+	
+	private float mImpactBegins; //in seconds, can be converted to sound or sensor index with known sampling rate
+	private float mImpactEnds;
+	private float mMovementBegins;
+	private float mMovementEnds;
 	
 	private double mWeightMacro;
 	private double mWeightMicro;
@@ -34,25 +47,51 @@ public class FeatureComputer {
 	
 	private double mNoiseDistribution;
 	
+	/*private SensorLog mAccelLog;
+	private SensorLog mGravLog;
+	private SensorLog mGyroLog;
+	private SensorLog mMagnetLog;
+	private SensorLog mRotVecLog;*/
+	
+	private List<Double> mSoundData;
+	private List<Double> mSoundDataMovement;
+	private List<Double> mSoundDataImpact;
+	private List<float[]> mAccelData;
+	private List<Float> mAccelDataMovement;
+	private List<Float> mAccelDataImpact;
+	
+	private Calculator mCalculator;
+	
 	public interface iOnFeaturesFinishedListener {
 		public void onFeaturesComputed(long duration);
 	}
 	
-	public FeatureComputer(String featurePath, Bitmap surfacePicture, boolean databaseMode) {
+	public FeatureComputer(String featurePath, Bitmap surfacePicture, List<Double> soundData, SensorLog accelLog, boolean databaseMode) {
+		
+		mCalculator = new Calculator();
+		
 		mFeaturePath = featurePath;
 		mSurfacePicture = surfacePicture;
+		mSoundData = soundData;
+		mAccelData = accelLog.getValues();
 		mDatabaseMode = databaseMode;
-	}
-	
-	private void initWeights() {
-		mWeightMacro = 0.4;
-		mWeightMicro = 0.4;
-		mWeightFineness = 0.2;
+		
+		mSoundDataMovement = new ArrayList<Double>();
+		mSoundDataImpact = new ArrayList<Double>();
+		mAccelDataMovement = new ArrayList<Float>();
+		mAccelDataImpact = new ArrayList<Float>();
 	}
 	
 	public void computeFeatures() {
 		
 		initWeights();
+		
+		getIntervals(); // get Indices to split sensor and sound data into "no contact", "impact" and "movement"
+						   // splitting happens in the next two methods; so far only one data segment after 1s is used (movement)
+		
+		prepareSoundData(); //extract movement data (currently fixed to 1s to end) 
+		
+		prepareSensorData(); //extract movement data (currently fixed to 1s to end); use only one axis or use absolute acceleration (currently only y-axis)
 		
 		computeHardnessAndImpactDuration();
 		
@@ -77,15 +116,107 @@ public class FeatureComputer {
 		//onFeaturesComputed(mImpactDuration);
 	}
 	
+	private void initWeights() {
+		
+		Log.i("Features", "initWeights()");
+		
+		mWeightMacro = 0.4;
+		mWeightMicro = 0.4;
+		mWeightFineness = 0.2;
+	}
+	
+	private void getIntervals() {
+		
+		Log.i("Features", "getIntervals()");
+		
+		mImpactBegins = 0.5f;
+		mImpactEnds = 1.0f;
+		mMovementBegins = 1.0f;
+		//mMovementEnds = // currently movement ends at the end of the recording (last index of lists)
+	}
+	
+	private void prepareSoundData() {
+				
+		Log.i("Features", "prepareSoundData()");
+		
+		mSoundDataImpact = mSoundData;
+		mSoundDataMovement = mSoundData;
+		
+		/*int beginImpactIndex = (int)(mImpactBegins * Constants.RECORDER_SAMPLING_RATE);
+		int endImpactIndex = (int)(mImpactEnds * Constants.RECORDER_SAMPLING_RATE);
+		
+		for(int i = 0; i < beginImpactIndex; i++) {
+			mSoundDataImpact.remove(i);
+		}
+		
+		for(int i = endImpactIndex; i < mSoundDataImpact.size(); i++) {
+			mSoundDataImpact.remove(i);
+		}
+		
+		int beginMovementIndex = (int)(mMovementBegins * Constants.RECORDER_SAMPLING_RATE);
+			
+		for(int i = 0; i < beginMovementIndex; i++) {
+			mSoundDataMovement.remove(i); // remove elements before start of movement
+		}*/
+	}
+	
+	private void prepareSensorData() {
+		
+		Log.i("Features", "prepareSensorData()");
+		
+		for(int i = 0; i < mAccelData.size(); i++) {
+			mAccelDataImpact.add(mAccelData.get(i)[1]); // use only y-axis
+		}
+		
+		for(int i = 0; i < mAccelData.size(); i++) {
+			mAccelDataMovement.add(mAccelData.get(i)[1]); // use only y-axis
+		}
+		
+		/*int beginImpactIndex = (int)(mImpactBegins * Constants.SAMPLE_RATE_ACCEL);
+		int endImpactIndex = (int)(mImpactEnds * Constants.SAMPLE_RATE_ACCEL);
+		
+		for(int i = 0; i < beginImpactIndex; i++) {
+			mAccelDataImpact.remove(i);
+		}
+		
+		for(int i = endImpactIndex; i < mSoundDataImpact.size(); i++) {
+			mAccelDataImpact.remove(i);
+		}
+		
+		int beginMovementIndex = (int)(mMovementBegins * Constants.SAMPLE_RATE_ACCEL);
+		
+		for(int i = 0; i < beginMovementIndex; i++) { 
+			mAccelDataMovement.remove(i); // remove elements before start of movement
+		}*/
+	}
+	
 	private void computeHardnessAndImpactDuration() {
 		mHardness = 1;
 		mImpactDuration = 500;
 	}
 	
 	private void computeMacroscopicImage() {
-		mMacroImage = mSurfacePicture;
+		
+		mMacroImage = toGrayscale(mSurfacePicture);
 		
 		savePictureToFile(mFeaturePath, mMacroImage);
+	}
+	
+	//from leparlon on http://stackoverflow.com/questions/3373860/convert-a-bitmap-to-grayscale-in-android
+	private Bitmap toGrayscale(Bitmap bmpOriginal) {        
+	    int width, height;
+	    height = bmpOriginal.getHeight();
+	    width = bmpOriginal.getWidth();    
+
+	    Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+	    Canvas c = new Canvas(bmpGrayscale);
+	    Paint paint = new Paint();
+	    ColorMatrix cm = new ColorMatrix();
+	    cm.setSaturation(0);
+	    ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+	    paint.setColorFilter(f);
+	    c.drawBitmap(bmpOriginal, 0, 0, paint);
+	    return bmpGrayscale;
 	}
 	
 	private void savePictureToFile(String pathToFile, Bitmap picture) {
@@ -131,14 +262,71 @@ public class FeatureComputer {
 	}
 	
 	private void computeNoiseDistribution() {
+		
+		ListIterator<Double> itBegin = mSoundDataMovement.listIterator();
+		ListIterator<Double> itEnd = mSoundDataMovement.listIterator(mSoundDataMovement.size()-1);
+		
+		double maxAbs = mCalculator.getAbsoluteMaximumDouble(itBegin, itEnd);
+		
+		Log.i("Features", "Max: " + maxAbs);
+		
+		double distThresh = 0.1 * maxAbs;
+		
+		List<Integer> binarySignal = new ArrayList<Integer>();
+		
+		int numberOfOnes = 0;
+		int numberOfZeros = 0;
+		
+		for(ListIterator<Double> lit = itBegin; (lit.hasNext() && lit != itEnd); ) {
+			
+			double nextValue = lit.next();
+			
+			if(nextValue > distThresh) {
+				binarySignal.add(1);
+				numberOfOnes++;
+			} else {
+				binarySignal.add(0);
+				numberOfZeros++;
+			}
+		}
+		
+		mNoiseDistribution = (double)numberOfOnes / (double)numberOfZeros;
+		
+		if(!mDatabaseMode && (mNoiseDistribution > 1.0)) {
+			mNoiseDistribution = 1.0;
+		}
+		
 		mNoiseDistribution = 0.5;
 	}
 	
 	private void calculateWeightMacroRoughness() {
+		
+		ListIterator<Float> itBegin = mAccelDataMovement.listIterator(0);
+		ListIterator<Float> itEnd = mAccelDataMovement.listIterator(mAccelDataMovement.size()-1);
+		
+		double variance = mCalculator.varianceFloat(itBegin, itEnd);
+		
+		mWeightMacro = 3.0 * variance;
+		
+		if(!mDatabaseMode && mWeightMacro > 1.0) {
+			mWeightMacro = 1.0;
+		}
+		
 		mWeightMacro = 0.4;
 	}
 	
 	private void calculateWeightMicroRoughness() {
+		
+		ListIterator<Double> itBegin = mSoundDataMovement.listIterator(0);
+		ListIterator<Double> itEnd = mSoundDataMovement.listIterator(mSoundDataMovement.size()-1);
+		
+		double bandpower = mCalculator.bandPowerDouble(itBegin, itEnd);
+		
+		mWeightMicro = 5 * bandpower;
+		if (!mDatabaseMode && mWeightMicro > 1.0) {
+			mWeightMicro = 1.0;
+		}
+		
 		mWeightMicro = 0.4;
 	}
 	
@@ -165,14 +353,14 @@ public class FeatureComputer {
 
 		//only round when not in database mode
 		if(!mDatabaseMode) {
-			mMacroAmplitude = roundDigits(mMacroAmplitude, precisionDigitParameter);
-			mMicroAmplitude = roundDigits(mMicroAmplitude, precisionDigitParameter);
-			mFinenessAmplitude = roundDigits(mFinenessAmplitude, precisionDigitParameter);
-			mNoiseDistribution = roundDigits(mNoiseDistribution, precisionDigitParameter);
-			mWeightMacro = roundDigits(mWeightMacro, precisionWeights);
-			mWeightMicro = roundDigits(mWeightMicro, precisionWeights);
-			mWeightFineness = roundDigits(mWeightFineness, precisionWeights);
-			mHardness = roundDigits(mHardness, precisionDigitParameter);
+			mMacroAmplitude = mCalculator.roundDigits(mMacroAmplitude, precisionDigitParameter);
+			mMicroAmplitude = mCalculator.roundDigits(mMicroAmplitude, precisionDigitParameter);
+			mFinenessAmplitude = mCalculator.roundDigits(mFinenessAmplitude, precisionDigitParameter);
+			mNoiseDistribution = mCalculator.roundDigits(mNoiseDistribution, precisionDigitParameter);
+			mWeightMacro = mCalculator.roundDigits(mWeightMacro, precisionWeights);
+			mWeightMicro = mCalculator.roundDigits(mWeightMicro, precisionWeights);
+			mWeightFineness = mCalculator.roundDigits(mWeightFineness, precisionWeights);
+			mHardness = mCalculator.roundDigits(mHardness, precisionDigitParameter);
 			//impact duration does not have to be rounded
 		}
 		
@@ -203,14 +391,6 @@ public class FeatureComputer {
 			
 			writeStringToFile(mFeaturePath, featureString);
 		}
-	}
-	
-	private double roundDigits(double toRound, int precision) {
-		
-		double factor = Math.pow(10, precision);
-		double value = toRound * factor;
-		value = Math.round(value);
-		return value /= factor;
 	}
 	
 	private void writeStringToFile(String pathToFile, String stringToWrite) {

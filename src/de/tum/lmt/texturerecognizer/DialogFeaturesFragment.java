@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -136,7 +138,9 @@ public class DialogFeaturesFragment extends DialogFragment implements FeatureCom
 				
 				String featurePath = MainActivity.getLoggingDir() + Constants.DATA_TO_SEND_FOLDER_NAME + File.separator;
 				
-				mFeatureComputer = new FeatureComputer(featurePath, mBitmapNoFlash, mDatabaseMode);
+				List<Double> soundData = getSoundData();
+				
+				mFeatureComputer = new FeatureComputer(featurePath, mBitmapNoFlash, soundData, mAccelLog, mDatabaseMode);
 				
 				mFeatureComputer.computeFeatures();
 				
@@ -170,9 +174,10 @@ public class DialogFeaturesFragment extends DialogFragment implements FeatureCom
 	    return bytes;
 	}
 	
+	//should be called after Feature Extraction
 	private void extractImpact(long duration) {
 		
-		mSoundStream = getSoundStream();
+		/*mSoundStream = getSoundStream();
 
 		if(mSoundStream != null) {
 
@@ -185,7 +190,7 @@ public class DialogFeaturesFragment extends DialogFragment implements FeatureCom
 		}
 		else {
 			Log.e(TAG, "Could not read .wav file");
-		}
+		}*/
 		
 		//byte[] soundImpactArray = toByteArray(mWaveReader.getData());
 
@@ -272,6 +277,34 @@ public class DialogFeaturesFragment extends DialogFragment implements FeatureCom
 			e.printStackTrace();
 		}
 		return soundStream;
+	}
+	
+	private List<Double> getSoundData() {
+		
+		mSoundStream = getSoundStream();
+
+		if(mSoundStream != null) {
+
+			try {
+				mWaveReader = new WaveReader(mSoundStream);
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else {
+			Log.e(TAG, "Could not read .wav file");
+		}
+		
+		double[] soundDataArray =  mWaveReader.getData();
+		
+		List<Double> soundDataList = new ArrayList<Double>();
+		
+		for(double sound : soundDataArray) {
+			soundDataList.add(sound);
+		}
+		
+		return soundDataList;
 	}
 
 	@Override

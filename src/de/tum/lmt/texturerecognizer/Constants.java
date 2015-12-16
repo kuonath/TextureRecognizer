@@ -63,6 +63,9 @@ public class Constants {
 	public static final String PARAMETERS_FILENAME = "parameters" + TXT_SUFFIX_NAME;
 	public static final String IMPACT_FILENAME = "/impact.wav";
 	
+	//Feature Extractor
+	public static final int SAMPLE_RATE_ACCEL = 100;
+	
 	//Send Dialog
 	public static final List<String> NAMES_OF_BLUETOOTH_FILES_TO_SEND = Arrays.asList(new String[] { "macro", "parameters", "display", "sound", "impact" });
 }
