@@ -41,21 +41,25 @@
         
         <activity 
             android:name=".SettingsActivity"
+            android:screenOrientation="portrait"
             android:label="Settings">
         </activity>
         
         <activity
             android:name=".SensorCalibrationActivity"
+            android:screenOrientation="portrait"
             android:label="Calibration">
         </activity>
         
         <activity
             android:name=".CameraActivity"
+            android:screenOrientation="portrait"
             android:label="Camera">
         </activity>
         
         <activity 
             android:name=".SensorLoggingActivity"
+            android:screenOrientation="portrait"
             android:label="Logging">
         </activity>
         

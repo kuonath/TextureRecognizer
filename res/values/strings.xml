@@ -4,11 +4,12 @@
     <string name="app_name">TextureRecognizer</string>
     
     <!-- Dialog for sensor selection -->
-    <string name="sensor_accel">Acceleration Sensor</string>
+    <string name="sensor_accel">Acceleration Sensor (always active)</string>
     <string name="sensor_grav">Gravity Sensor</string>
     <string name="sensor_gyro">Gyroscope</string>
     <string name="sensor_magnet">Magnetic Field Sensor</string>
     <string name="sensor_rotvec">Rotation Vector Sensor</string>
+    <string name="accel_click">Acceleration sensor has to be activated</string>
     
     <!-- Preferences -->
     <string name="select_sensors">Please select the sensors you want to use:</string>
@@ -25,7 +26,7 @@
     <string name="not_available">not available</string>
     
     <!-- Main Activity TextureRecognizerActivity -->
-    <string name="textview_instructions_start">Start the textured surface analysis app by pressing the play button.</string>
+    <string name="textview_instructions_start">Start the recording procedure by pressing the play button.</string>
     <string name="button_new_texture">New Entry</string>
     <string name="button_add_to_entry">Add to existing Texture</string>
     
@@ -46,25 +47,25 @@
     <!-- CameraActivity -->
     <string name="taking">taking </string>
     <string name="picture">picture?</string>
-    <string name="textview_instructions_camera_1">Take two pictures now!</string>
-    <string name="textview_instructions_camera_2">Picture taken. Please click OK to proceed with sensor logging.</string>
+    <string name="textview_instructions_camera_1">Take two pictures by clicking on the camera button only once!</string>
+    <string name="textview_instructions_camera_2">Pictures taken. Please click OK to proceed with the audio and sensor recordings.</string>
     <string name="message_open_failed">Could not open Camera. Please restart the App.</string>
     <string name="message_picture_taken_1">First picture taken!</string>
-    <string name="message_picture_taken_2">Second picture taken! Now you can press on play button to proceed to next step!</string>
+    <string name="message_picture_taken_2">Second picture taken! Please click OK to proceed with the audio and sensor recordings.</string>
     
     <!-- SensorLoggingActivity -->
     <string name="logging">logging</string>
     <string name="waiting">Waiting</string>
     <string name="checkbox_sensors_logging">Log sensors</string>
     <string name="checkbox_audio_logging">Record audio</string>
+    <string name="wait_vibration">Wait for the first vibration signal &#8230;</string>
     <string name="no_box_checked">Please make sure at least one of checkboxes is checked before you start.</string>
     <string name="warning_logging">WARNING! No sensors being logged! Please start again, but this time choose particular sensors from the preference list.</string>
     <string name="status_logging">Currently logging! Click on the button to stop logging.</string>
-    <string name="textview_instructions_logging_1">To start logging the sensors press the Camera Button. Right after the vibration signal, sweep the tip across the texture for 7s to record the
+    <string name="textview_instructions_logging_1">To start the audio and sensor recordings press the Camera Button. Right after the first vibration signal, move the metal tip across the surface for 7s to record the
 sensor data and audio until there is another vibration.</string>
 	<string name="textview_instructions_logging_2"> </string>
-	<string name="textview_instructions_logging_3">Logging finished. Please press the OK Button to continue and finish data collection. You can now send the data via E-Mail to a Computer to process the data and analyse the texture.</string>
-	<string name="textview_magn_data_length">Number of samples for the magnetic sensor: %1$d\n</string>
+	<string name="textview_instructions_logging_3">Logging finished. Please press the OK Button to continue and finish data collection. You can now extract features from the recorded data and send them to the TPad.</string>
 	<string name="button_features">Extract Features</string>
 	
 	<!-- Logging -->
@@ -78,8 +79,8 @@ sensor data and audio until there is another vibration.</string>
     <string name="checkbox_delete_data">Delete recorded data</string>
     
     <!-- Continue Dialog  -->
-    <string name="next_camera">The next step will be for you to take a photo of the texture.</string>
-    <string name="next_logging">The next step will be the recording of sensor data and audio."</string>
+    <string name="next_camera">The next step will be for you to take two photos of the texture.</string>
+    <string name="next_logging">The next step will be the audio and sensor recordings."</string>
     <string name="message_continue">Do you want to continue?</string>
     
     <!-- Feature Dialog -->

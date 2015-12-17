@@ -59,6 +59,9 @@ public class SettingsActivity extends Activity {
             mMagnetPref = (CheckBoxPreference) findPreference(Constants.PREF_KEY_MAGNET_SELECT);
             mRotVecPref = (CheckBoxPreference) findPreference(Constants.PREF_KEY_ROTVEC_SELECT);
             
+            //Accel always checked
+            mAccelPref.setEnabled(false);
+            
             checkIfSensorAvailable();
             
             setSummaries();

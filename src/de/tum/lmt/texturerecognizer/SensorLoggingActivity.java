@@ -128,7 +128,7 @@ public class SensorLoggingActivity extends Activity {
 
 			public void onClick(View v) {
 
-				mDescription2.setText("Preparing sensors...");
+				mDescription2.setText(getString(R.string.wait_vibration));
 
 				mTimerHandler.postDelayed( new Runnable() {
 					@Override

@@ -40,6 +40,7 @@
         android:layout_below="@id/textview_instructions_logging_1"
         android:text="@string/checkbox_sensors_logging"
         android:checked="true"
+        android:enabled="false"
     />
     
     <CheckBox 
@@ -50,6 +51,7 @@
         android:layout_below="@id/checkbox_sensors_logging"
         android:text="@string/checkbox_audio_logging"
         android:checked="true"
+        android:enabled="false"
     />
      <LinearLayout
          android:id="@+id/button_start_loggingLinLay"

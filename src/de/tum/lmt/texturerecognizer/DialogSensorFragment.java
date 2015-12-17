@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 public class DialogSensorFragment extends DialogFragment {
 	
@@ -81,12 +82,19 @@ public class DialogSensorFragment extends DialogFragment {
         // read shared preferences and check CheckBoxes accordingly so that the CheckBoxes show the settings
         // of the last use of the app when the app gets opened for the next time
         final SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mUseAccel = sharedPrefs.getBoolean(Constants.PREF_KEY_ACCEL_SELECT, false);
+        //mUseAccel = sharedPrefs.getBoolean(Constants.PREF_KEY_ACCEL_SELECT, false);
         mUseGrav = sharedPrefs.getBoolean(Constants.PREF_KEY_GRAV_SELECT, false);
         mUseGyro = sharedPrefs.getBoolean(Constants.PREF_KEY_GYRO_SELECT, false);
         mUseMagnet = sharedPrefs.getBoolean(Constants.PREF_KEY_MAGNET_SELECT, false);
         mUseRotVec = sharedPrefs.getBoolean(Constants.PREF_KEY_ROTVEC_SELECT, false);
         mUseExternAccel = sharedPrefs.getBoolean(Constants.PREF_KEY_EXTERN_ACCEL, false);
+        
+        //Accel immer verwenden
+        if(mAccelAvailable) {
+        	mUseAccel = true;
+        	mAccelBox.setClickable(false);
+        	mAccelBox.setEnabled(false);
+        }
         
         mAccelBox.setChecked(mUseAccel);
         mGravBox.setChecked(mUseGrav);
@@ -125,8 +133,10 @@ public class DialogSensorFragment extends DialogFragment {
                 boolean checked = !mAccelBox.isChecked();
                 if (checked) {
                     Log.i(TAG, "checked");
-                    mAccelBox.setChecked(false);
-                    mUseAccel = false;
+                    //can't uncheck Accel
+                    //mAccelBox.setChecked(false);
+                    //mUseAccel = false;
+                    Toast.makeText(mContext, getString(R.string.accel_click), Toast.LENGTH_LONG);
                 } else {
                     Log.i(TAG, "not checked");
                     mAccelBox.setChecked(true);

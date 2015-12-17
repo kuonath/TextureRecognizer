@@ -40,7 +40,7 @@ public class Constants {
 	
 	//SensorLoggingActivity
 	public final static long DURATION_WAIT = 2000;
-	public final static long DURATION_INTERESTED = 6000; // ms, 5s is fine
+	public final static long DURATION_INTERESTED = 5000; // ms, 5s is fine
 	public final static int PRECISION_TO_WRITE_SENSOR_DATA = 4;	// 4 digits after comma when writing sensor data to file 
 	public final static long DURATION_TO_LOG = DURATION_INTERESTED + 2000; // ms, because not instant
 	

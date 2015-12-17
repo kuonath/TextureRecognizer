@@ -142,22 +142,26 @@ public class FeatureComputer {
 		mSoundDataImpact = mSoundData;
 		mSoundDataMovement = mSoundData;
 		
-		/*int beginImpactIndex = (int)(mImpactBegins * Constants.RECORDER_SAMPLING_RATE);
+		int beginImpactIndex = (int)(mImpactBegins * Constants.RECORDER_SAMPLING_RATE);
 		int endImpactIndex = (int)(mImpactEnds * Constants.RECORDER_SAMPLING_RATE);
 		
-		for(int i = 0; i < beginImpactIndex; i++) {
+		for(int i = (mSoundDataImpact.size() - 1); i > endImpactIndex; i--) {
 			mSoundDataImpact.remove(i);
 		}
 		
-		for(int i = endImpactIndex; i < mSoundDataImpact.size(); i++) {
-			mSoundDataImpact.remove(i);
+		if(beginImpactIndex < mSoundDataImpact.size()) {
+			for(int i = (beginImpactIndex - 1); i >= 0; i--) {
+				mSoundDataImpact.remove(i);
+			}
 		}
 		
 		int beginMovementIndex = (int)(mMovementBegins * Constants.RECORDER_SAMPLING_RATE);
-			
-		for(int i = 0; i < beginMovementIndex; i++) {
-			mSoundDataMovement.remove(i); // remove elements before start of movement
-		}*/
+		
+		if(beginMovementIndex < mSoundDataMovement.size()) {
+			for(int i = (beginMovementIndex - 1); i >= 0; i--) {
+				mSoundDataMovement.remove(i); // remove elements before start of movement
+			}
+		}
 	}
 	
 	private void prepareSensorData() {
@@ -172,22 +176,26 @@ public class FeatureComputer {
 			mAccelDataMovement.add(mAccelData.get(i)[1]); // use only y-axis
 		}
 		
-		/*int beginImpactIndex = (int)(mImpactBegins * Constants.SAMPLE_RATE_ACCEL);
+		int beginImpactIndex = (int)(mImpactBegins * Constants.SAMPLE_RATE_ACCEL);
 		int endImpactIndex = (int)(mImpactEnds * Constants.SAMPLE_RATE_ACCEL);
 		
-		for(int i = 0; i < beginImpactIndex; i++) {
+		for(int i = (mAccelDataImpact.size() - 1); i > endImpactIndex; i--) {
 			mAccelDataImpact.remove(i);
 		}
 		
-		for(int i = endImpactIndex; i < mSoundDataImpact.size(); i++) {
-			mAccelDataImpact.remove(i);
+		if(beginImpactIndex < mAccelDataImpact.size()) {
+			for(int i = (beginImpactIndex - 1); i >= 0; i--) {
+				mAccelDataImpact.remove(i);
+			}
 		}
 		
 		int beginMovementIndex = (int)(mMovementBegins * Constants.SAMPLE_RATE_ACCEL);
 		
-		for(int i = 0; i < beginMovementIndex; i++) { 
-			mAccelDataMovement.remove(i); // remove elements before start of movement
-		}*/
+		if(beginMovementIndex < mAccelDataMovement.size()) {
+			for(int i = (beginMovementIndex - 1); i >= 0; i--) {
+				mAccelDataMovement.remove(i); // remove elements before start of movement
+			}
+		}
 	}
 	
 	private void computeHardnessAndImpactDuration() {
