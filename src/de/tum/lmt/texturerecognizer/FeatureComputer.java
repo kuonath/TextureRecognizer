@@ -66,12 +66,11 @@ public class FeatureComputer {
 		public void onFeaturesComputed(long duration);
 	}
 	
-	public FeatureComputer(String featurePath, Bitmap surfacePicture, List<Double> soundData, SensorLog accelLog, boolean databaseMode) {
+	public FeatureComputer(String featurePath, List<Double> soundData, SensorLog accelLog, boolean databaseMode) {
 		
 		mCalculator = new Calculator();
 		
 		mFeaturePath = featurePath;
-		mSurfacePicture = surfacePicture;
 		mSoundData = soundData;
 		mAccelData = accelLog.getValues();
 		mDatabaseMode = databaseMode;
@@ -95,7 +94,7 @@ public class FeatureComputer {
 		
 		computeHardnessAndImpactDuration();
 		
-		computeMacroscopicImage();
+		
 		
 		computeMacroAmplitude();
 		computeMicroAmplitude();
@@ -203,20 +202,17 @@ public class FeatureComputer {
 		mImpactDuration = 500;
 	}
 	
-	private void computeMacroscopicImage() {
-		
-		mMacroImage = toGrayscale(mSurfacePicture);
-		
-		savePictureToFile(mFeaturePath, mMacroImage);
-	}
-	
+
 	//from leparlon on http://stackoverflow.com/questions/3373860/convert-a-bitmap-to-grayscale-in-android
 	private Bitmap toGrayscale(Bitmap bmpOriginal) {        
 	    int width, height;
 	    height = bmpOriginal.getHeight();
 	    width = bmpOriginal.getWidth();    
 
-	    Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+	    
+	    Log.i("TAG","width/height:" + width + "..." + height);
+	    Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, bmpOriginal.getConfig());
+	    
 	    Canvas c = new Canvas(bmpGrayscale);
 	    Paint paint = new Paint();
 	    ColorMatrix cm = new ColorMatrix();
@@ -227,35 +223,7 @@ public class FeatureComputer {
 	    return bmpGrayscale;
 	}
 	
-	private void savePictureToFile(String pathToFile, Bitmap picture) {
-		
-		File pictureFile = new File(pathToFile + "macro.jpg");
-		
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		
-		picture.compress(Bitmap.CompressFormat.JPEG, Constants.JPG_COMPRESSION_LEVEL, bytes);
 
-		FileOutputStream fos = null;
-
-		try {
-			fos = new FileOutputStream(pictureFile);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			fos.write(bytes.toByteArray());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			fos.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	
 	private void computeMacroAmplitude() {
 		mMacroAmplitude = 1;

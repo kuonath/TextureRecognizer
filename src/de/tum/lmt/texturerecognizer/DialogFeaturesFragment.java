@@ -19,6 +19,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -48,6 +52,7 @@ public class DialogFeaturesFragment extends DialogFragment implements FeatureCom
 
 	private Bitmap mBitmapNoFlash;
 	private Bitmap mBitmapFlash;
+	private Bitmap mGrayscale;
 	private InputStream mSoundStream;
 	private WaveReader mWaveReader;
 
@@ -140,7 +145,7 @@ public class DialogFeaturesFragment extends DialogFragment implements FeatureCom
 				
 				List<Double> soundData = getSoundData();
 				
-				mFeatureComputer = new FeatureComputer(featurePath, mBitmapNoFlash, soundData, mAccelLog, mDatabaseMode);
+				mFeatureComputer = new FeatureComputer(featurePath, soundData, mAccelLog, mDatabaseMode);
 				
 				mFeatureComputer.computeFeatures();
 				
@@ -225,8 +230,27 @@ public class DialogFeaturesFragment extends DialogFragment implements FeatureCom
 	private void loadBitmaps() {
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+		options.inMutable = true;
 		mBitmapNoFlash = BitmapFactory.decodeFile(mBitmapNoFlashFilename, options);
 		mBitmapFlash = BitmapFactory.decodeFile(mBitmapFlashFilename, options);
+		
+		
+		mGrayscale = BitmapFactory.decodeFile(mBitmapNoFlashFilename, options);
+	    Canvas c = new Canvas(mGrayscale);
+	    Paint paint = new Paint();
+	    ColorMatrix cm = new ColorMatrix();
+	    cm.setSaturation(0);
+	    ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+	    paint.setColorFilter(f);
+	    c.drawBitmap(mBitmapNoFlash, 0, 0, paint);
+	    
+	    String featurePath = MainActivity.getLoggingDir() + Constants.DATA_TO_SEND_FOLDER_NAME + File.separator;
+		savePictureToFile(featurePath, mGrayscale);
+		
+		mGrayscale.recycle();
+		// ToDo use later
+		mBitmapFlash.recycle();
+		
 	}
 	
 	private void prepareBitmaps() {
@@ -234,6 +258,7 @@ public class DialogFeaturesFragment extends DialogFragment implements FeatureCom
 		String featurePath = MainActivity.getLoggingDir() + Constants.DATA_TO_SEND_FOLDER_NAME + File.separator;
 		
 		saveDisplayPictureToFile(featurePath, mBitmapNoFlash);
+		mBitmapNoFlash.recycle();
 	}
 	
 	private void saveDisplayPictureToFile(String pathToFile, Bitmap displayPicture) {
@@ -265,7 +290,36 @@ public class DialogFeaturesFragment extends DialogFragment implements FeatureCom
 			e.printStackTrace();
 		}
 	}
+	private void savePictureToFile(String pathToFile, Bitmap picture) {
+		
+		File pictureFile = new File(pathToFile + "macro.jpg");
+		
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		
+		picture.compress(Bitmap.CompressFormat.JPEG, Constants.JPG_COMPRESSION_LEVEL, bytes);
 
+		FileOutputStream fos = null;
+
+		try {
+			fos = new FileOutputStream(pictureFile);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			fos.write(bytes.toByteArray());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			fos.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	private InputStream getSoundStream() {
 		File soundData = new File(mAudioFilename);
 		InputStream soundStream = null;
